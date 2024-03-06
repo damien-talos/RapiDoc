@@ -7,6 +7,16 @@ import BorderStyles from '~/styles/border-styles';
 import CustomStyles from '~/styles/custom-styles';
 
 export default class SchemaTree extends LitElement {
+  ['::deprecated'] = false;
+
+  ['::description'] = '';
+
+  ['::readwrite'] = '';
+
+  ['::title'] = '';
+
+  ['::type'] = '';
+
   static get properties() {
     return {
       data: { type: Object },
@@ -316,7 +326,7 @@ export default class SchemaTree extends LitElement {
         <div class='td key-descr'>
           ${description || schemaTitle || schemaDescription
             ? html`${html`<span class="m-markdown-small">
-                ${unsafeHTML(marked(dataType === 'array'
+                ${unsafeHTML(marked(dataType === 'array' || dataType === 'enum'
                   ? `${descrExpander} ${description}`
                   : schemaTitle
                     ? `${descrExpander} <b>${schemaTitle}:</b> ${schemaDescription}`
@@ -327,7 +337,7 @@ export default class SchemaTree extends LitElement {
           }  
           ${constraint ? html`<div style='display:inline-block; line-break:anywhere; margin-right:8px'><span class='bold-text'>Constraints: </span>${constraint}</div>` : ''}
           ${defaultValue ? html`<div style='display:inline-block; line-break:anywhere; margin-right:8px'><span class='bold-text'>Default: </span>${defaultValue}</div>` : ''}
-          ${allowedValues ? html`<div style='display:inline-block; line-break:anywhere; margin-right:8px'><span class='bold-text'>${type === 'const' ? 'Value' : 'Allowed'}: </span>${allowedValues}</div>` : ''}
+          ${allowedValues ? html`<div style='display:inline-block; line-break:anywhere; margin-right:8px'><span class='bold-text'>${type === 'const' ? 'Value' : 'Allowed'}: </span>${unsafeHTML(marked(allowedValues))}</div>` : ''}
           ${pattern ? html`<div style='display:inline-block; line-break: anywhere; margin-right:8px'><span class='bold-text'>Pattern: </span>${pattern}</div>` : ''}
         </div>
       </div>

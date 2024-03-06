@@ -22,6 +22,21 @@ export function getPrintableVal(val) {
   return val.toString().replace(/^ +| +$/g, (m) => '●'.repeat(m.length)) || '';
 }
 
+function getAllowedValues(schema) {
+  if (schema.const) {
+    return schema.const;
+  }
+  if (Array.isArray(schema.enum)) {
+    if ('x-ms-enum' in schema) {
+      return `| Name | Value | Description |
+| ---- | ----- | ----------- |
+${schema['x-ms-enum'].values.map((v) => (`| ${v.name} | ${getPrintableVal(v.value)} | ${v.description} |`)).join('\n')}`;
+    }
+    return schema.enum.map((v) => (getPrintableVal(v))).join('┃');
+  }
+  return '';
+}
+
 /* Generates an schema object containing type and constraint info */
 export function getTypeInfo(schema) {
   if (!schema) {
@@ -55,6 +70,7 @@ export function getTypeInfo(schema) {
     type: dataType,
     format: schema.format || '',
     pattern: (schema.pattern && !schema.enum) ? schema.pattern : '',
+    /** @type {ReadOrWrite} */
     readOrWriteOnly: (schema.readOnly ? '🆁' : schema.writeOnly ? '🆆' : ''),
     deprecated: schema.deprecated ? '❌' : '',
     examples: schema.examples || schema.example,
@@ -63,6 +79,7 @@ export function getTypeInfo(schema) {
     constrain: '',
     allowedValues: '',
     arrayType: '',
+    /** @type {SchemaInfo} */
     html: '',
   };
 
@@ -72,11 +89,7 @@ export function getTypeInfo(schema) {
     info.description = info.description || '';
   }
   // Set Allowed Values
-  info.allowedValues = schema.const
-    ? schema.const
-    : Array.isArray(schema.enum)
-      ? schema.enum.map((v) => (getPrintableVal(v))).join('┃')
-      : '';
+  info.allowedValues = getAllowedValues(schema);
 
   if (dataType === 'array' && schema.items) {
     const arrayItemType = schema.items?.type;
@@ -114,6 +127,18 @@ export function getTypeInfo(schema) {
   info.html = `${info.type}~|~${info.readOrWriteOnly}~|~${info.constrain}~|~${info.default}~|~${info.allowedValues}~|~${info.pattern}~|~${info.description}~|~${schema.title || ''}~|~${info.deprecated ? 'deprecated' : ''}`;
   return info;
 }
+
+/**
+ * @typedef {'🆁'|'🆆'|''} ReadOrWrite
+ * @typedef {string} Constrain
+ * @typedef {string} Default
+ * @typedef {string} AllowedValues
+ * @typedef {string} Pattern
+ * @typedef {string} Description
+ * @typedef {'deprecated'|''} Deprecated
+ * @typedef {'~|~'} Separator
+ * @typedef {`${'enum'|'object'}${Separator}${ReadOrWrite}${Separator}${Constrain}${Separator}${Default}${Separator}${AllowedValues}${Separator}${Pattern}${Separator}${Description}${Separator}${Deprecated}`} SchemaInfo
+ */
 
 export function nestExampleIfPresent(example) {
   if (typeof example === 'boolean' || typeof example === 'number') {

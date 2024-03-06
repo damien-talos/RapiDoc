@@ -1008,7 +1008,10 @@ export default class ApiRequest extends LitElement {
   curlSyntaxTemplate(display = 'flex') {
     return html`
       <div class="col m-markdown" style="flex:1; display:${display}; position:relative; max-width: 100%;">
-        <button  class="toolbar-btn" style = "position:absolute; top:12px; right:8px" @click='${(e) => { copyToClipboard(this.curlSyntax.replace(/\\$/, ''), e); }}' part="btn btn-fill"> Copy </button>
+        <div style = "position:absolute; top:12px; right:8px; display: flex;">
+          <button  class="toolbar-btn" @click='${this.onGenerateCURLClick}' part="btn btn-fill"> Regenerate </button>
+          <button  class="toolbar-btn" @click='${(e) => { copyToClipboard(this.curlSyntax.replace(/\\$/, ''), e); }}' part="btn btn-fill"> Copy </button>
+        </div>
         <pre style="white-space:pre"><code>${unsafeHTML(Prism.highlight(this.curlSyntax.trim().replace(/\\$/, ''), Prism.languages.shell, 'shell'))}</code></pre>
       </div>
       `;
@@ -1420,7 +1423,6 @@ export default class ApiRequest extends LitElement {
     const reqHeaders = this.buildFetchHeaders(requestPanelEl);
     this.responseUrl = '';
     this.responseHeaders = [];
-    this.curlSyntax = this.generateCURLSyntax(fetchUrl, reqHeaders, fetchOptions, requestPanelEl);
     this.responseStatus = 'success';
     this.responseIsBlob = false;
 
@@ -1436,20 +1438,27 @@ export default class ApiRequest extends LitElement {
     const { signal } = controller;
     fetchOptions.headers = reqHeaders;
     const tempRequest = { url: fetchUrl, ...fetchOptions };
-    this.dispatchEvent(new CustomEvent('before-try', {
+
+    const event = new CustomEvent('before-try', {
       bubbles: true,
       composed: true,
       detail: {
         request: tempRequest,
         controller,
+        promises: [],
       },
-    }));
+    });
+    this.dispatchEvent(event);
+    await Promise.all(event.detail.promises);
+
     const updatedFetchOptions = {
       method: tempRequest.method,
       headers: tempRequest.headers,
       credentials: tempRequest.credentials,
       body: tempRequest.body,
     };
+    this.curlSyntax = this.generateCURLSyntax(tempRequest.url, tempRequest.headers, updatedFetchOptions, requestPanelEl);
+
     const fetchRequest = new Request(tempRequest.url, updatedFetchOptions);
 
     let fetchResponse;
@@ -1582,8 +1591,8 @@ export default class ApiRequest extends LitElement {
     this.requestUpdate();
   }
 
-  liveCURLSyntaxUpdate(requestPanelEl) {
-    this.applyCURLSyntax(requestPanelEl);
+  async liveCURLSyntaxUpdate(requestPanelEl) {
+    await this.applyCURLSyntax(requestPanelEl);
     this.requestUpdate();
   }
 
@@ -1596,12 +1605,35 @@ export default class ApiRequest extends LitElement {
     return e.target.closest('.request-panel');
   }
 
-  applyCURLSyntax(requestPanelEl) {
+  async applyCURLSyntax(requestPanelEl) {
     const fetchUrl = this.buildFetchURL(requestPanelEl);
     const fetchOptions = this.buildFetchBodyOptions(requestPanelEl);
-    const fetchHeaders = this.buildFetchHeaders(requestPanelEl);
+    const reqHeaders = this.buildFetchHeaders(requestPanelEl);
 
-    this.curlSyntax = this.generateCURLSyntax(fetchUrl, fetchHeaders, fetchOptions, requestPanelEl);
+    if (this.fetchCredentials) {
+      fetchOptions.credentials = this.fetchCredentials;
+    }
+    fetchOptions.headers = reqHeaders;
+    const tempRequest = { url: fetchUrl, ...fetchOptions };
+
+    const event = new CustomEvent('before-try', {
+      bubbles: true,
+      composed: true,
+      detail: {
+        request: tempRequest,
+        promises: [],
+      },
+    });
+    this.dispatchEvent(event);
+    await Promise.all(event.detail.promises);
+
+    const updatedFetchOptions = {
+      method: tempRequest.method,
+      headers: tempRequest.headers,
+      credentials: tempRequest.credentials,
+      body: tempRequest.body,
+    };
+    this.curlSyntax = this.generateCURLSyntax(tempRequest.url, tempRequest.headers, updatedFetchOptions, requestPanelEl);
   }
 
   generateCURLSyntax(fetchUrl, fetchHeaders, fetchOptions, requestPanelEl) {
