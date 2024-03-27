@@ -5533,6 +5533,20 @@ function getPrintableVal(val) {
   }
   return val.toString().replace(/^ +| +$/g, m => '●'.repeat(m.length)) || '';
 }
+function getAllowedValues(schema) {
+  if (schema.const) {
+    return schema.const;
+  }
+  if (Array.isArray(schema.enum)) {
+    if ('x-ms-enum' in schema) {
+      return `| Name | Value | Description |
+| ---- | ----- | ----------- |
+${schema['x-ms-enum'].values.map(v => `| ${v.name} | ${getPrintableVal(v.value)} | ${v.description} |`).join('\n')}`;
+    }
+    return schema.enum.map(v => getPrintableVal(v)).join('┃');
+  }
+  return '';
+}
 
 /* Generates an schema object containing type and constraint info */
 function getTypeInfo(schema) {
@@ -5566,6 +5580,7 @@ function getTypeInfo(schema) {
     type: dataType,
     format: schema.format || '',
     pattern: schema.pattern && !schema.enum ? schema.pattern : '',
+    /** @type {ReadOrWrite} */
     readOrWriteOnly: schema.readOnly ? '🆁' : schema.writeOnly ? '🆆' : '',
     deprecated: schema.deprecated ? '❌' : '',
     examples: schema.examples || schema.example,
@@ -5574,6 +5589,7 @@ function getTypeInfo(schema) {
     constrain: '',
     allowedValues: '',
     arrayType: '',
+    /** @type {SchemaInfo} */
     html: ''
   };
   if (info.type === '{recursive}') {
@@ -5582,7 +5598,7 @@ function getTypeInfo(schema) {
     info.description = info.description || '';
   }
   // Set Allowed Values
-  info.allowedValues = schema.const ? schema.const : Array.isArray(schema.enum) ? schema.enum.map(v => getPrintableVal(v)).join('┃') : '';
+  info.allowedValues = getAllowedValues(schema);
   if (dataType === 'array' && schema.items) {
     var _schema$items, _schema$items2;
     const arrayItemType = (_schema$items = schema.items) === null || _schema$items === void 0 ? void 0 : _schema$items.type;
@@ -5615,6 +5631,19 @@ function getTypeInfo(schema) {
   info.html = `${info.type}~|~${info.readOrWriteOnly}~|~${info.constrain}~|~${info.default}~|~${info.allowedValues}~|~${info.pattern}~|~${info.description}~|~${schema.title || ''}~|~${info.deprecated ? 'deprecated' : ''}`;
   return info;
 }
+
+/**
+ * @typedef {'🆁'|'🆆'|''} ReadOrWrite
+ * @typedef {string} Constrain
+ * @typedef {string} Default
+ * @typedef {string} AllowedValues
+ * @typedef {string} Pattern
+ * @typedef {string} Description
+ * @typedef {'deprecated'|''} Deprecated
+ * @typedef {'~|~'} Separator
+ * @typedef {`${'enum'|'object'}${Separator}${ReadOrWrite}${Separator}${Constrain}${Separator}${Default}${Separator}${AllowedValues}${Separator}${Pattern}${Separator}${Description}${Separator}${Deprecated}`} SchemaInfo
+ */
+
 function nestExampleIfPresent(example) {
   if (typeof example === 'boolean' || typeof example === 'number') {
     return {
@@ -6827,6 +6856,9 @@ customElements.define('json-tree', JsonTree);
 }
 `);
 ;// CONCATENATED MODULE: ./src/components/schema-tree.js
+function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typeof key === "symbol" ? key : String(key); }
+function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
 
  // eslint-disable-line import/extensions
 
@@ -6835,6 +6867,14 @@ customElements.define('json-tree', JsonTree);
 
 
 class SchemaTree extends lit_element_s {
+  constructor(...args) {
+    super(...args);
+    _defineProperty(this, '::deprecated', false);
+    _defineProperty(this, '::description', '');
+    _defineProperty(this, '::readwrite', '');
+    _defineProperty(this, '::title', '');
+    _defineProperty(this, '::type', '');
+  }
   static get properties() {
     return {
       data: {
@@ -7105,11 +7145,11 @@ class SchemaTree extends lit_element_s {
         </div>
         <div class='td key-descr'>
           ${description || schemaTitle || schemaDescription ? lit_html_x`${lit_html_x`<span class="m-markdown-small">
-                ${unsafe_html_o(marked(dataType === 'array' ? `${descrExpander} ${description}` : schemaTitle ? `${descrExpander} <b>${schemaTitle}:</b> ${schemaDescription}` : `${descrExpander} ${schemaDescription}`))}
+                ${unsafe_html_o(marked(dataType === 'array' || dataType === 'enum' ? `${descrExpander} ${description}` : schemaTitle ? `${descrExpander} <b>${schemaTitle}:</b> ${schemaDescription}` : `${descrExpander} ${schemaDescription}`))}
               </span>`}` : ''}  
           ${constraint ? lit_html_x`<div style='display:inline-block; line-break:anywhere; margin-right:8px'><span class='bold-text'>Constraints: </span>${constraint}</div>` : ''}
           ${defaultValue ? lit_html_x`<div style='display:inline-block; line-break:anywhere; margin-right:8px'><span class='bold-text'>Default: </span>${defaultValue}</div>` : ''}
-          ${allowedValues ? lit_html_x`<div style='display:inline-block; line-break:anywhere; margin-right:8px'><span class='bold-text'>${type === 'const' ? 'Value' : 'Allowed'}: </span>${allowedValues}</div>` : ''}
+          ${allowedValues ? lit_html_x`<div style='display:inline-block; line-break:anywhere; margin-right:8px'><span class='bold-text'>${type === 'const' ? 'Value' : 'Allowed'}: </span>${unsafe_html_o(marked(allowedValues))}</div>` : ''}
           ${pattern ? lit_html_x`<div style='display:inline-block; line-break: anywhere; margin-right:8px'><span class='bold-text'>Pattern: </span>${pattern}</div>` : ''}
         </div>
       </div>
@@ -8188,7 +8228,7 @@ class ApiRequest extends lit_element_s {
                     data-example = "${Array.isArray(fieldExamples) ? fieldExamples.join('~|~') : fieldExamples}"
                     data-array = "true"
                     placeholder = "add-multiple &#x21a9;"
-                    .value = "${Array.isArray(fieldExamples) ? Array.isArray(fieldExamples[0]) ? fieldExamples[0] : [fieldExamples[0]] : [fieldExamples]}"
+                    .value = "${Array.isArray(fieldExamples) ? Array.isArray(fieldExamples[0]) ? fieldExamples[0] : fieldExamples : []}"
                   >
                   </tag-input>
                 ` : lit_html_x`
@@ -8267,9 +8307,12 @@ class ApiRequest extends lit_element_s {
   curlSyntaxTemplate(display = 'flex') {
     return lit_html_x`
       <div class="col m-markdown" style="flex:1; display:${display}; position:relative; max-width: 100%;">
-        <button  class="toolbar-btn" style = "position:absolute; top:12px; right:8px" @click='${e => {
+        <div style = "position:absolute; top:12px; right:8px; display: flex;">
+          <button  class="toolbar-btn" @click='${this.onGenerateCURLClick}' part="btn btn-fill"> Regenerate </button>
+          <button  class="toolbar-btn" @click='${e => {
       copyToClipboard(this.curlSyntax.replace(/\\$/, ''), e);
     }}' part="btn btn-fill"> Copy </button>
+        </div>
         <pre style="white-space:pre"><code>${unsafe_html_o(prism_default().highlight(this.curlSyntax.trim().replace(/\\$/, ''), (prism_default()).languages.shell, 'shell'))}</code></pre>
       </div>
       `;
@@ -8312,12 +8355,13 @@ class ApiRequest extends lit_element_s {
         </div>
         ${this.responseIsBlob ? lit_html_x`
             <div class="tab-content col" style="flex:1; display:${this.activeResponseTab === 'response' ? 'flex' : 'none'};">
+              ${this.responseBlobType === 'image' ? lit_html_x`<img style="max-height:var(--resp-area-height, 400px); object-fit:contain;" class="mar-top-8" src="${this.responseBlobUrl}"></img>` : ''}  
               <button class="m-btn thin-border mar-top-8" style="width:135px" @click='${e => {
       downloadResource(this.responseBlobUrl, this.respContentDisposition, e);
     }}' part="btn btn-outline">
                 DOWNLOAD
               </button>
-              ${this.responseBlobType === 'view' ? lit_html_x`<button class="m-btn thin-border mar-top-8" style="width:135px"  @click='${e => {
+              ${this.responseBlobType === 'view' || this.responseBlobType === 'image' ? lit_html_x`<button class="m-btn thin-border mar-top-8" style="width:135px"  @click='${e => {
       viewResource(this.responseBlobUrl, e);
     }}' part="btn btn-outline">VIEW (NEW TAB)</button>` : ''}
             </div>` : lit_html_x`
@@ -8662,7 +8706,6 @@ class ApiRequest extends lit_element_s {
     const reqHeaders = this.buildFetchHeaders(requestPanelEl);
     this.responseUrl = '';
     this.responseHeaders = [];
-    this.curlSyntax = this.generateCURLSyntax(fetchUrl, reqHeaders, fetchOptions, requestPanelEl);
     this.responseStatus = 'success';
     this.responseIsBlob = false;
     this.respContentDisposition = '';
@@ -8682,20 +8725,24 @@ class ApiRequest extends lit_element_s {
       url: fetchUrl,
       ...fetchOptions
     };
-    this.dispatchEvent(new CustomEvent('before-try', {
+    const event = new CustomEvent('before-try', {
       bubbles: true,
       composed: true,
       detail: {
         request: tempRequest,
-        controller
+        controller,
+        promises: []
       }
-    }));
+    });
+    this.dispatchEvent(event);
+    await Promise.all(event.detail.promises);
     const updatedFetchOptions = {
       method: tempRequest.method,
       headers: tempRequest.headers,
       credentials: tempRequest.credentials,
       body: tempRequest.body
     };
+    this.curlSyntax = this.generateCURLSyntax(tempRequest.url, tempRequest.headers, updatedFetchOptions, requestPanelEl);
     const fetchRequest = new Request(tempRequest.url, updatedFetchOptions);
     let fetchResponse;
     let responseClone;
@@ -8712,6 +8759,22 @@ class ApiRequest extends lit_element_s {
         signal
       });
       const endTime = performance.now();
+      // Allow to modify response
+      let resolveModifiedResponse; // Create a promise that will be resolved from the event listener
+      const modifiedResponsePromise = new Promise(resolve => {
+        resolveModifiedResponse = resolve;
+      });
+      this.dispatchEvent(new CustomEvent('fetched-try', {
+        bubbles: true,
+        composed: true,
+        detail: {
+          request: fetchRequest,
+          response: fetchResponse,
+          resolveModifiedResponse // pass the resolver function
+        }
+      }));
+
+      fetchResponse = await modifiedResponsePromise; // Wait for the modified response
       responseClone = fetchResponse.clone(); // create a response clone to allow reading response body again (response.json, response.text etc)
       tryBtnEl.disabled = false;
       this.responseMessage = lit_html_x`${fetchResponse.statusText ? `${fetchResponse.statusText}:${fetchResponse.status}` : fetchResponse.status} <div style="color:var(--light-fg)"> Took ${Math.round(endTime - startTime)} milliseconds </div>`;
@@ -8751,6 +8814,9 @@ class ApiRequest extends lit_element_s {
         } else if (/^font\/|tar$|zip$|7z$|rtf$|msword$|excel$|\/pdf$|\/octet-stream$|^application\/vnd\./.test(contentType)) {
           this.responseIsBlob = true;
           this.responseBlobType = 'download';
+        } else if (/^image/.test(contentType)) {
+          this.responseIsBlob = true;
+          this.responseBlobType = 'image';
         } else if (/^audio|^image|^video/.test(contentType)) {
           this.responseIsBlob = true;
           this.responseBlobType = 'view';
@@ -8813,8 +8879,8 @@ class ApiRequest extends lit_element_s {
     }
     this.requestUpdate();
   }
-  liveCURLSyntaxUpdate(requestPanelEl) {
-    this.applyCURLSyntax(requestPanelEl);
+  async liveCURLSyntaxUpdate(requestPanelEl) {
+    await this.applyCURLSyntax(requestPanelEl);
     this.requestUpdate();
   }
   onGenerateCURLClick(e) {
@@ -8824,11 +8890,35 @@ class ApiRequest extends lit_element_s {
   getRequestPanel(e) {
     return e.target.closest('.request-panel');
   }
-  applyCURLSyntax(requestPanelEl) {
+  async applyCURLSyntax(requestPanelEl) {
     const fetchUrl = this.buildFetchURL(requestPanelEl);
     const fetchOptions = this.buildFetchBodyOptions(requestPanelEl);
-    const fetchHeaders = this.buildFetchHeaders(requestPanelEl);
-    this.curlSyntax = this.generateCURLSyntax(fetchUrl, fetchHeaders, fetchOptions, requestPanelEl);
+    const reqHeaders = this.buildFetchHeaders(requestPanelEl);
+    if (this.fetchCredentials) {
+      fetchOptions.credentials = this.fetchCredentials;
+    }
+    fetchOptions.headers = reqHeaders;
+    const tempRequest = {
+      url: fetchUrl,
+      ...fetchOptions
+    };
+    const event = new CustomEvent('before-try', {
+      bubbles: true,
+      composed: true,
+      detail: {
+        request: tempRequest,
+        promises: []
+      }
+    });
+    this.dispatchEvent(event);
+    await Promise.all(event.detail.promises);
+    const updatedFetchOptions = {
+      method: tempRequest.method,
+      headers: tempRequest.headers,
+      credentials: tempRequest.credentials,
+      body: tempRequest.body
+    };
+    this.curlSyntax = this.generateCURLSyntax(tempRequest.url, tempRequest.headers, updatedFetchOptions, requestPanelEl);
   }
   generateCURLSyntax(fetchUrl, fetchHeaders, fetchOptions, requestPanelEl) {
     let curlUrl;
@@ -9220,7 +9310,7 @@ class SchemaTable extends lit_element_s {
           </span>`}
           ${constraint ? lit_html_x`<div class='' style='display:inline-block; line-break:anywhere; margin-right:8px;'> <span class='bold-text'>Constraints: </span> ${constraint}</div>` : ''}
           ${defaultValue ? lit_html_x`<div style='display:inline-block; line-break:anywhere; margin-right:8px;'> <span class='bold-text'>Default: </span>${defaultValue}</div>` : ''}
-          ${allowedValues ? lit_html_x`<div style='display:inline-block; line-break:anywhere; margin-right:8px;'> <span class='bold-text'>${type === 'const' ? 'Value' : 'Allowed'}: </span>${allowedValues}</div>` : ''}
+          ${allowedValues ? lit_html_x`<div style='display:inline-block; line-break:anywhere; margin-right:8px;'> <span class='bold-text'>${type === 'const' ? 'Value' : 'Allowed'}: </span>${unsafe_html_o(marked(allowedValues))}</div>` : ''}
           ${pattern ? lit_html_x`<div style='display:inline-block; line-break:anywhere; margin-right:8px;'> <span class='bold-text'>Pattern: </span>${pattern}</div>` : ''}
         </div>
       </div>
@@ -10223,7 +10313,7 @@ function navbarTemplate() {
               </div>
               ${component.subComponents.filter(p => p.expanded !== false).map(p => lit_html_x`
                 <div class='nav-bar-path' data-action='navigate' data-content-id='cmp--${p.id}' id='link-cmp--${p.id}'>
-                  <span> ${p.name} </span>
+                  <span style = 'pointer-events: none;'> ${p.name} </span>
                 </div>`)}` : '')}` : ''}
     </nav>`}
 </nav>
@@ -11505,6 +11595,10 @@ class RapiDoc extends lit_element_s {
         type: String,
         attribute: 'page-direction'
       },
+      scrollBehavior: {
+        type: String,
+        attribute: 'scroll-behavior'
+      },
       // Main Colors and Font
       theme: {
         type: String
@@ -12049,6 +12143,9 @@ class RapiDoc extends lit_element_s {
     if (!this.matchType || !'includes regex'.includes(this.matchType)) {
       this.matchType = 'includes';
     }
+    if (!this.scrollBehavior || !'smooth, auto,'.includes(`${this.scrollBehavior},`)) {
+      this.scrollBehavior = 'auto';
+    }
     if (!this.showAdvancedSearchDialog) {
       this.showAdvancedSearchDialog = false;
     }
@@ -12379,7 +12476,7 @@ class RapiDoc extends lit_element_s {
         const gotoEl = this.shadowRoot.getElementById(tmpElementId);
         if (gotoEl) {
           gotoEl.scrollIntoView({
-            behavior: 'auto',
+            behavior: this.scrollBehavior,
             block: 'start'
           });
           if (this.updateRoute === 'true') {
@@ -12424,7 +12521,7 @@ class RapiDoc extends lit_element_s {
             this.replaceHistoryState(entry.target.id);
           }
           newNavEl.scrollIntoView({
-            behavior: 'auto',
+            behavior: this.scrollBehavior,
             block: 'center'
           });
           newNavEl.classList.add('active');
@@ -12448,7 +12545,7 @@ class RapiDoc extends lit_element_s {
         const gotoEl = this.shadowRoot.getElementById(e.target.getAttribute('href').replace('#', ''));
         if (gotoEl) {
           gotoEl.scrollIntoView({
-            behavior: 'auto',
+            behavior: this.scrollBehavior,
             block: 'start'
           });
         }
@@ -12504,7 +12601,7 @@ class RapiDoc extends lit_element_s {
       if (contentEl) {
         isValidElementId = true;
         contentEl.scrollIntoView({
-          behavior: 'auto',
+          behavior: this.scrollBehavior,
           block: 'start'
         });
       } else {
@@ -12533,7 +12630,7 @@ class RapiDoc extends lit_element_s {
         if (newNavEl) {
           if (scrollNavItemToView) {
             newNavEl.scrollIntoView({
-              behavior: 'auto',
+              behavior: this.scrollBehavior,
               block: 'center'
             });
           }
@@ -19483,7 +19580,7 @@ function getType(str) {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("373f37ab7534d66db541")
+/******/ 		__webpack_require__.h = () => ("5806786b2a222c76d90b")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */
