@@ -1,5 +1,6 @@
 import { html } from 'lit';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js'; // eslint-disable-line import/extensions
+import { until } from 'lit/directives/until.js'; // eslint-disable-line import/extensions
 import { marked } from 'marked';
 import { schemaInObjectNotation } from '~/utils/schema-utils';
 import '~/components/json-tree';
@@ -63,7 +64,7 @@ export default function componentsTemplate() {
     <div id="cmp--${component.name.toLowerCase()}" class='regular-font section-gap--read-mode observe-me' style="border-top:1px solid var(--primary-color);">
       <div class="title tag">${component.name}</div>
       <div class="regular-font-size">
-        ${unsafeHTML(`<div class='m-markdown regular-font'>${marked(component.description ? component.description : '')}</div>`)}
+        ${unsafeHTML(`<div class='m-markdown regular-font'>${until(marked(component.description ? component.description : ''), html``)}</div>`)}
       </div>
     </div>
     <div class='regular-font section-gap--read-mode'>

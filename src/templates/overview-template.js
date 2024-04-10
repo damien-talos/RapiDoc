@@ -1,5 +1,6 @@
 import { html } from 'lit';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js'; // eslint-disable-line import/extensions
+import { until } from 'lit/directives/until.js'; // eslint-disable-line import/extensions
 import { marked } from 'marked';
 import { downloadResource, viewResource } from '~/utils/common-utils';
 
@@ -62,11 +63,12 @@ export default function overviewTemplate() {
           <slot name="overview"></slot>
           <div id="api-description">
           ${this.resolvedSpec.info.description
-            ? html`${
-              unsafeHTML(`
-                <div class="m-markdown regular-font">
-                ${marked(this.resolvedSpec.info.description, this.infoDescriptionHeadingsInNavBar === 'true' ? { renderer: headingRenderer() } : undefined)}
-              </div>`)}`
+            ? until(marked(
+                      this.resolvedSpec.info.description,
+                      this.infoDescriptionHeadingsInNavBar === 'true' ? { renderer: headingRenderer() } : undefined,
+                        ).then((processed) => unsafeHTML(`<div class="m-markdown regular-font">${
+                          `${processed}`
+                        }</div>`)), html`<div class="m-markdown regular-font"></div>`)
             : ''
           }
           </div>

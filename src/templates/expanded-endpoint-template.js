@@ -1,5 +1,6 @@
 import { html } from 'lit';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js'; // eslint-disable-line import/extensions
+import { until } from 'lit/directives/until.js'; // eslint-disable-line import/extensions
 import { marked } from 'marked';
 import { rapidocApiKey } from '~/utils/common-utils';
 import { pathSecurityTemplate } from '~/templates/security-scheme-template';
@@ -180,7 +181,7 @@ export default function expandedEndpointTemplate() {
       ${
         unsafeHTML(`
           <div class="m-markdown regular-font">
-          ${marked(tag.description || '', this.infoDescriptionHeadingsInNavBar === 'true' ? { renderer: headingRenderer(tag.elementId) } : undefined)}
+          ${until(marked(tag.description || '', this.infoDescriptionHeadingsInNavBar === 'true' ? { renderer: headingRenderer(tag.elementId) } : undefined), html``)}
         </div>`)
       }
       </div>

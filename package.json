@@ -38,6 +38,8 @@
     "buffer": "^6.0.3",
     "lit": "^2.7.5",
     "marked": "^5.1.0",
+    "marked-directive": "^1.0.5",
+    "marked-sequential-hooks": "^1.2.1",
     "prismjs": "^1.29.0",
     "xml-but-prettier": "^1.0.1"
   },

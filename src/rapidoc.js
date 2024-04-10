@@ -1,5 +1,7 @@
 import { css, LitElement, unsafeCSS } from 'lit';
 import { marked } from 'marked';
+// import markedSequentialHooks from 'marked-sequential-hooks';
+import { createDirectives, presetDirectiveConfigs } from 'marked-directive';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-css';
 import 'prismjs/components/prism-yaml';
@@ -28,6 +30,19 @@ import ProcessSpec from '~/utils/spec-parser';
 import mainBodyTemplate from '~/templates/main-body-template';
 import { applyApiKey, onClearAllApiKeys } from '~/templates/security-scheme-template';
 import { setApiServer } from '~/templates/server-template';
+
+// defines `:include` directive
+const noticeDirective = /** @type {import('marked-directive').DirectiveConfig} */({
+  level: 'container',
+  marker: ':::',
+  renderer(token) {
+    if (/notice|info|warning/.test(token.meta.name)) {
+      return `<aside class="${token.meta.name}">${this.parser.parse(token.tokens)}</aside>`;
+    }
+
+    return false;
+  },
+});
 
 export default class RapiDoc extends LitElement {
   constructor() {
@@ -526,7 +541,7 @@ export default class RapiDoc extends LitElement {
         }
         return code;
       },
-    });
+    }).use(createDirectives([...presetDirectiveConfigs, noticeDirective]));
 
     window.addEventListener('hashchange', () => {
       this.scrollToPath(this.getElementIDFromURL());

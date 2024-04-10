@@ -265,4 +265,31 @@ export default css`
   .m-markdown hr{
     border: 1px solid var(--border-color);
   }
+
+  aside {
+    padding-top: 1em;
+    padding-bottom: 1em;
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+    line-height: 1.6;
+    padding-left: 28px;
+    position: relative;
+    left: 0.5em;
+    top: 1.3em;
+  }
+  aside:before {
+    position: absolute;
+    vertical-align: middle;
+    padding-right: 0.5em;
+    font-size: 14px;
+    font-weight: bold;
+    display: inline;
+  }
+  .notice {
+    background: #8fbcd4;
+  }
+  .notice:before {
+    content: '\\24D8';
+  }
+
 `;
