@@ -36,7 +36,7 @@ const noticeDirective = /** @type {import('marked-directive').DirectiveConfig} *
   level: 'container',
   marker: ':::',
   renderer(token) {
-    if (/notice|info|warning/.test(token.meta.name)) {
+    if (/notice|info|warning|danger/.test(token.meta.name)) {
       return `<aside class="${token.meta.name}">${this.parser.parse(token.tokens)}</aside>`;
     }
 

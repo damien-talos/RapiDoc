@@ -291,5 +291,11 @@ export default css`
   .notice:before {
     content: '\\24D8';
   }
+  .danger {
+    background: #e58fa9;
+  }
+  .danger:before {
+    content: '\\26A0';
+  }
 
 `;

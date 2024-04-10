@@ -3667,6 +3667,12 @@ var prism_csharp = __webpack_require__(16);
   .notice:before {
     content: '\\24D8';
   }
+  .danger {
+    background: #e58fa9;
+  }
+  .danger:before {
+    content: '\\26A0';
+  }
 
 `);
 ;// CONCATENATED MODULE: ./src/styles/input-styles.js
@@ -11815,7 +11821,7 @@ const noticeDirective = /** @type {import('marked-directive').DirectiveConfig} *
   level: 'container',
   marker: ':::',
   renderer(token) {
-    if (/notice|info|warning/.test(token.meta.name)) {
+    if (/notice|info|warning|danger/.test(token.meta.name)) {
       return `<aside class="${token.meta.name}">${this.parser.parse(token.tokens)}</aside>`;
     }
     return false;
@@ -20646,7 +20652,7 @@ function getType(str) {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("16346fde163c8d7ee609")
+/******/ 		__webpack_require__.h = () => ("e36511d979635b50e04c")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */
