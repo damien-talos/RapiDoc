@@ -274,11 +274,11 @@ export default css`
     line-height: 1.6;
     padding-left: 28px;
     position: relative;
-    left: 0.5em;
-    top: 1.3em;
   }
   aside:before {
     position: absolute;
+    left: 0.5em;
+    top: 1.3em;
     vertical-align: middle;
     padding-right: 0.5em;
     font-size: 14px;

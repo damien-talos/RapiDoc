@@ -3650,11 +3650,11 @@ var prism_csharp = __webpack_require__(16);
     line-height: 1.6;
     padding-left: 28px;
     position: relative;
-    left: 0.5em;
-    top: 1.3em;
   }
   aside:before {
     position: absolute;
+    left: 0.5em;
+    top: 1.3em;
     vertical-align: middle;
     padding-right: 0.5em;
     font-size: 14px;
@@ -20646,7 +20646,7 @@ function getType(str) {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("8e04e8adf7033d69ff82")
+/******/ 		__webpack_require__.h = () => ("16346fde163c8d7ee609")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */
