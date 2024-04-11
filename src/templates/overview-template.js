@@ -63,10 +63,10 @@ export default function overviewTemplate() {
           <slot name="overview"></slot>
           <div id="api-description">
           ${this.resolvedSpec.info.description
-            ? until(marked(
+            ? until(Promise.resolve(marked(
                       this.resolvedSpec.info.description,
                       this.infoDescriptionHeadingsInNavBar === 'true' ? { renderer: headingRenderer() } : undefined,
-                        ).then((processed) => unsafeHTML(`<div class="m-markdown regular-font">${
+                        )).then((processed) => unsafeHTML(`<div class="m-markdown regular-font">${
                           `${processed}`
                         }</div>`)), html`<div class="m-markdown regular-font"></div>`)
             : ''

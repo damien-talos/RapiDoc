@@ -10390,9 +10390,9 @@ function overviewTemplate() {
           </div>
           <slot name="overview"></slot>
           <div id="api-description">
-          ${this.resolvedSpec.info.description ? until_m(marked(this.resolvedSpec.info.description, this.infoDescriptionHeadingsInNavBar === 'true' ? {
+          ${this.resolvedSpec.info.description ? until_m(Promise.resolve(marked(this.resolvedSpec.info.description, this.infoDescriptionHeadingsInNavBar === 'true' ? {
     renderer: overview_template_headingRenderer()
-  } : undefined).then(processed => unsafe_html_o(`<div class="m-markdown regular-font">${`${processed}`}</div>`)), lit_html_x`<div class="m-markdown regular-font"></div>`) : ''}
+  } : undefined)).then(processed => unsafe_html_o(`<div class="m-markdown regular-font">${`${processed}`}</div>`)), lit_html_x`<div class="m-markdown regular-font"></div>`) : ''}
           </div>
         ` : ''}
     </section>
@@ -20652,7 +20652,7 @@ function getType(str) {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("e36511d979635b50e04c")
+/******/ 		__webpack_require__.h = () => ("db61eb7c98037eed2d55")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */
