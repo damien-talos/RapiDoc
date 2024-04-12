@@ -50,7 +50,8 @@
     "serve-prod": "webpack serve --mode=production",
     "serve1": "node --trace-deprecation ./node_modules/webpack/bin/webpack serve",
     "lint": "./node_modules/eslint/bin/eslint.js ./src/**",
-    "lint-fix": "./node_modules/eslint/bin/eslint.js --fix ./src/**"
+    "lint-fix": "./node_modules/eslint/bin/eslint.js --fix ./src/**",
+    "format": "prettier --write \"src/**/*.{js,html}\""
   },
   "devDependencies": {
     "@babel/core": "^7.22.5",
@@ -63,6 +64,7 @@
     "css-loader": "^6.8.1",
     "eslint": "^8.43.0",
     "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-prettier": "^9.1.0",
     "eslint-import-resolver-webpack": "^0.13.2",
     "eslint-plugin-import": "^2.27.5",
     "eslint-webpack-plugin": "4.0.1",
@@ -70,6 +72,7 @@
     "filemanager-webpack-plugin": "^8.0.0",
     "html-webpack-plugin": "^5.5.3",
     "inspectpack": "^4.7.1",
+    "prettier": "^3.2.5",
     "style-loader": "^3.3.3",
     "terser-webpack-plugin": "^5.3.9",
     "unminified-webpack-plugin": "^3.0.0",

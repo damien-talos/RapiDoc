@@ -22,61 +22,63 @@ const isPromise = (x) => !isPrimitive(x) && typeof x.then === 'function';
  * be manually connected & disconnected to the backing instance.
  */
 class PseudoWeakRef {
-    constructor(ref) {
-        this._ref = ref;
-    }
-    /**
-     * Disassociates the ref with the backing instance.
-     */
-    disconnect() {
-        this._ref = undefined;
-    }
-    /**
-     * Reassociates the ref with the backing instance.
-     */
-    reconnect(ref) {
-        this._ref = ref;
-    }
-    /**
-     * Retrieves the backing instance (will be undefined when disconnected)
-     */
-    deref() {
-        return this._ref;
-    }
+  constructor(ref) {
+    this._ref = ref;
+  }
+  /**
+   * Disassociates the ref with the backing instance.
+   */
+  disconnect() {
+    this._ref = undefined;
+  }
+  /**
+   * Reassociates the ref with the backing instance.
+   */
+  reconnect(ref) {
+    this._ref = ref;
+  }
+  /**
+   * Retrieves the backing instance (will be undefined when disconnected)
+   */
+  deref() {
+    return this._ref;
+  }
 }
 /**
  * A helper to pause and resume waiting on a condition in an async function
  */
 class Pauser {
-    constructor() {
-        this._promise = undefined;
-        this._resolve = undefined;
-    }
-    /**
-     * When paused, returns a promise to be awaited; when unpaused, returns
-     * undefined. Note that in the microtask between the pauser being resumed
-     * an an await of this promise resolving, the pauser could be paused again,
-     * hence callers should check the promise in a loop when awaiting.
-     * @returns A promise to be awaited when paused or undefined
-     */
-    get() {
-        return this._promise;
-    }
-    /**
-     * Creates a promise to be awaited
-     */
-    pause() {
-        var _a;
-        (_a = this._promise) !== null && _a !== void 0 ? _a : (this._promise = new Promise((resolve) => (this._resolve = resolve)));
-    }
-    /**
-     * Resolves the promise which may be awaited
-     */
-    resume() {
-        var _a;
-        (_a = this._resolve) === null || _a === void 0 ? void 0 : _a.call(this);
-        this._promise = this._resolve = undefined;
-    }
+  constructor() {
+    this._promise = undefined;
+    this._resolve = undefined;
+  }
+  /**
+   * When paused, returns a promise to be awaited; when unpaused, returns
+   * undefined. Note that in the microtask between the pauser being resumed
+   * an an await of this promise resolving, the pauser could be paused again,
+   * hence callers should check the promise in a loop when awaiting.
+   * @returns A promise to be awaited when paused or undefined
+   */
+  get() {
+    return this._promise;
+  }
+  /**
+   * Creates a promise to be awaited
+   */
+  pause() {
+    var _a;
+    (_a = this._promise) !== null && _a !== void 0
+      ? _a
+      : (this._promise = new Promise((resolve) => (this._resolve = resolve)));
+  }
+  /**
+   * Resolves the promise which may be awaited
+   */
+  resume() {
+    var _a;
+    (_a = this._resolve) === null || _a === void 0 ? void 0 : _a.call(this);
+    this._promise = this._resolve = undefined;
+  }
 }
 
 // Effectively infinity, but a SMI.
@@ -159,7 +161,9 @@ export class UnsafeHTMLAsyncDirective extends AsyncDirective {
 
   render(...args) {
     let _a;
-    return (_a = args.find((x) => !isPromise(x))) !== null && _a !== void 0 ? _a : noChange;
+    return (_a = args.find((x) => !isPromise(x))) !== null && _a !== void 0
+      ? _a
+      : noChange;
   }
 
   update(_part, args) {
@@ -185,15 +189,15 @@ export class UnsafeHTMLAsyncDirective extends AsyncDirective {
         // Since a lower-priority value will never overwrite a higher-priority
         // synchronous value, we can stop processing now.
         const strings = [value];
-            strings.raw = strings;
+        strings.raw = strings;
         return {
-            // Cast to a known set of integers that satisfy ResultType so that we
-            // don't have to export ResultType and possibly encourage this pattern.
-            // This property needs to remain unminified.
-            _$litType$: HTML_RESULT, // (this.constructor).resultType,
-            strings,
-            values: [],
-          };
+          // Cast to a known set of integers that satisfy ResultType so that we
+          // don't have to export ResultType and possibly encourage this pattern.
+          // This property needs to remain unminified.
+          _$litType$: HTML_RESULT, // (this.constructor).resultType,
+          strings,
+          values: [],
+        };
       }
       // If this is a Promise we've already handled, skip it.
       if (i < previousLength && value === previousValues[i]) {

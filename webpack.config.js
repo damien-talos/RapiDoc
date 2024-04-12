@@ -22,7 +22,9 @@ const UnminifiedWebpackPlugin = require('unminified-webpack-plugin');
 const path = require('path');
 const ESLintPlugin = require('eslint-webpack-plugin');
 
-const rapidocVersion = JSON.stringify(require('./package.json').version).replace(/"/g, '');
+const rapidocVersion = JSON.stringify(
+  require('./package.json').version,
+).replace(/"/g, '');
 
 const rapidocBanner = `
 /**
@@ -57,22 +59,26 @@ const commonPlugins = [
 if (process.env.NODE_ENV === 'production') {
   console.log('BUILDING FOR PRODUCTION ... '); // eslint-disable-line no-console
   commonPlugins.push(new BundleAnalyzerPlugin({ analyzerMode: 'static' }));
-  commonPlugins.push(new DuplicatesPlugin({ emitErrors: false, verbose: true }));
+  commonPlugins.push(
+    new DuplicatesPlugin({ emitErrors: false, verbose: true }),
+  );
   commonPlugins.push(new UnminifiedWebpackPlugin());
-  commonPlugins.push(new webpack.BannerPlugin({
-    raw: true,
-    banner: rapidocBanner,
-  }));
+  commonPlugins.push(
+    new webpack.BannerPlugin({
+      raw: true,
+      banner: rapidocBanner,
+    }),
+  );
   // commonPlugins.push(new webpack.DefinePlugin({ VERSION }));
-  commonPlugins.push(new FileManagerPlugin({
-    events: {
-      onEnd: {
-        copy: [
-          { source: 'dist/*.js', destination: 'docs' },
-        ],
+  commonPlugins.push(
+    new FileManagerPlugin({
+      events: {
+        onEnd: {
+          copy: [{ source: 'dist/*.js', destination: 'docs' }],
+        },
       },
-    },
-  }));
+    }),
+  );
 }
 
 module.exports = {
@@ -89,7 +95,8 @@ module.exports = {
       new TerserPlugin({
         extractComments: {
           condition: /^\**!|@preserve|@license|@cc_on/i,
-          banner: (licenseFile) => `RapiDoc ${rapidocVersion} | Author - Mrinmoy Majumdar | License information can be found in ${licenseFile} `,
+          banner: (licenseFile) =>
+            `RapiDoc ${rapidocVersion} | Author - Mrinmoy Majumdar | License information can be found in ${licenseFile} `,
         },
       }),
     ],
@@ -106,9 +113,7 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        use: [
-          { loader: 'babel-loader' },
-        ],
+        use: [{ loader: 'babel-loader' }],
       },
       {
         test: /\.css$/,
@@ -119,12 +124,14 @@ module.exports = {
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/,
-        use: [{
-          loader: 'file-loader',
-          options: {
-            name: '[name].[ext]',
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]',
+            },
           },
-        }],
+        ],
       },
     ],
   },
@@ -135,7 +142,10 @@ module.exports = {
     },
     alias: {
       '~': path.resolve(__dirname, 'src'),
-      'lit-html/lib/shady-render.js': path.resolve(__dirname, './node_modules/lit-html/lit-html.js'), // removes shady-render.js from the bundle
+      'lit-html/lib/shady-render.js': path.resolve(
+        __dirname,
+        './node_modules/lit-html/lit-html.js',
+      ), // removes shady-render.js from the bundle
     },
   },
   plugins: commonPlugins,

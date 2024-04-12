@@ -55,7 +55,8 @@ export function componentIsInSearch(searchVal, component) {
 
 export function pathIsInSearch(searchVal, path, matchType = 'includes') {
   if (matchType === 'includes') {
-    const stringToSearch = `${path.method} ${path.path} ${path.summary || path.description || ''} ${path.operationId || ''}`.toLowerCase();
+    const stringToSearch =
+      `${path.method} ${path.path} ${path.summary || path.description || ''} ${path.operationId || ''}`.toLowerCase();
     return stringToSearch.includes(searchVal.toLowerCase());
   }
   const regex = new RegExp(searchVal, 'i');
@@ -96,21 +97,30 @@ export function advancedSearch(searchVal, allSpecTags, searchOptions = []) {
         stringToSearch = `${stringToSearch} ${path.parameters?.map((v) => v.name).join(' ') || ''}`;
       }
 
-      if (searchOptions.includes('search-api-request-body') && path.requestBody) {
+      if (
+        searchOptions.includes('search-api-request-body') &&
+        path.requestBody
+      ) {
         let schemaKeySet = new Set();
         for (const contentType in path.requestBody?.content) {
           if (path.requestBody.content[contentType].schema?.properties) {
-            schemaKeySet = schemaKeys(path.requestBody.content[contentType].schema?.properties);
+            schemaKeySet = schemaKeys(
+              path.requestBody.content[contentType].schema?.properties,
+            );
           }
           stringToSearch = `${stringToSearch} ${[...schemaKeySet].join(' ')}`;
         }
       }
 
       if (searchOptions.includes('search-api-resp-descr')) {
-        stringToSearch = `${stringToSearch} ${Object.values(path.responses).map((v) => v.description || '').join(' ')}`;
+        stringToSearch = `${stringToSearch} ${Object.values(path.responses)
+          .map((v) => v.description || '')
+          .join(' ')}`;
       }
 
-      if (stringToSearch.toLowerCase().includes(searchVal.trim().toLowerCase())) {
+      if (
+        stringToSearch.toLowerCase().includes(searchVal.trim().toLowerCase())
+      ) {
         pathsMatched.push({
           elementId: path.elementId,
           method: path.method,
