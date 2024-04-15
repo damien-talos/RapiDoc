@@ -1,7 +1,7 @@
 /* eslint-disable arrow-body-style */
 import { html } from 'lit';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js'; // eslint-disable-line import/extensions
-import { until } from 'lit/directives/until.js'; // eslint-disable-line import/extensions
+// import { until } from 'lit/directives/until.js'; // eslint-disable-line import/extensions
 import { marked } from 'marked';
 
 const codeVerifier = '731DB1C3F7EA533B85E29492D26AA-1234567890-1234567890';
@@ -724,7 +724,7 @@ export default function securitySchemeTemplate() {
                     </div>
                     ${v.description
                       ? html` <div class="m-markdown">
-                          ${unsafeHTML(until(marked(v.description || '')))}
+                          ${unsafeHTML(marked(v.description || ''))}
                         </div>`
                       : ''}
                     ${v.type.toLowerCase() === 'apikey' ||
